@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nolag-antidump-edge",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-10-06",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "antidump.ciphermode.net/servers/13/files/*",
+      "zone_name": "ciphermode.net"
+    }
+  ],
+  "vars": {
+    "NOLAG_HOST": "antidump.ciphermode.net",
+    "NOLAG_SERVER_ID": "13",
+    "NOLAG_PANEL_URL": "https://nolag.ciphermode.net"
+  }
+}
