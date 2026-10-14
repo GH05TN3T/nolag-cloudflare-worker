@@ -50,11 +50,11 @@ el build command `npm test` y gestiona el despliegue automático en Cloudflare.
 3. Despliega. Wrangler aplica la Route que incluye la configuración:
 
    ```text
-   antidump.nolagnetwork.net/servers/13/files/*
+   antidump.ciphermode.net/servers/13/files/*
    ```
 
    En **Settings → Domains & Routes**, confirma esa Route y la zona
-   `nolagnetwork.net`. El patrón cubre HTTP y HTTPS.
+   `ciphermode.net`. El patrón cubre HTTP y HTTPS.
 
 4. En **Settings → Variables and Secrets**, añade **`NOLAG_API_KEY` como Secret
    de runtime**. Obtén el valor de **GHOSTNETWORKS → Config FiveM → Config
@@ -73,9 +73,9 @@ el flujo de Worker para que Cloudflare utilice Wrangler y la Route.
 
 | Variable | Valor |
 |---|---|
-| `NOLAG_HOST` | `antidump.nolagnetwork.net` |
+| `NOLAG_HOST` | `antidump.ciphermode.net` |
 | `NOLAG_SERVER_ID` | `13` |
-| `NOLAG_PANEL_URL` | `https://panel.nolagnetwork.net` |
+| `NOLAG_PANEL_URL` | `https://panel.ciphermode.net` |
 | `NOLAG_API_KEY` | Secret añadido en Cloudflare |
 
 Para otro registro, modifica la Route y `NOLAG_SERVER_ID` en `wrangler.jsonc`
