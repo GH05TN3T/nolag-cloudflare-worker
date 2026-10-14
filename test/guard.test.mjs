@@ -67,9 +67,9 @@ test('report errors do not serve blocked assets and an unconfigured Worker does 
 test('domain migration filters the canonical host and explicitly configured aliases', async () => {
   const calls = [];
   const guard = createGuard(async req => { calls.push(req); return new Response('origin'); });
-  const migrated = { NOLAG_HOST: 'antidump.nolagnetwork.net', NOLAG_SERVER_ID: '13',
-    NOLAG_HOST_ALIASES: 'antidump.ciphermode.net, SECOND.example.test ' };
-  for (const host of ['antidump.nolagnetwork.net', 'antidump.ciphermode.net', 'second.example.test']) {
+  const migrated = { NOLAG_HOST: 'antidump.ciphermode.net', NOLAG_SERVER_ID: '13',
+    NOLAG_HOST_ALIASES: 'files.ciphermode.net, SECOND.example.test ' };
+  for (const host of ['antidump.ciphermode.net', 'files.ciphermode.net', 'second.example.test']) {
     const req = request('gzip, deflate', { url: `https://${host}/servers/13/files/car/asset.ytd?hash=abc` });
     assert.equal((await guard.fetch(req, migrated, {})).status, 403);
   }
