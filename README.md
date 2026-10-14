@@ -87,13 +87,13 @@ añade el Worker delante del origen existente; utiliza ese mismo hostname y
 su zona, sin asignarlo como Custom Domain del Worker. El Tunnel debe estar
 activo y NOLAG debe seguir accesible por esa ruta.
 
-Publica `antidump.nolagnetwork.net` en el Tunnel hacia `http://127.0.0.1:8080`,
-con HTTP Host Header `antidump.nolagnetwork.net`. Verifica que `/health` devuelva
+Publica `antidump.ciphermode.net` en el Tunnel hacia `http://127.0.0.1:8080`,
+con HTTP Host Header `antidump.ciphermode.net`. Verifica que `/health` devuelva
 el JSON de NOLAG con estado 200; un 522 requiere corregir DNS/Tunnel al origen.
 
-El panel y los reportes se publican en `https://panel.nolagnetwork.net/`.
+El panel y los reportes se publican en `https://panel.ciphermode.net/`.
 Publica también ese hostname en el Tunnel hacia `http://127.0.0.1:8080`, con
-HTTP Host Header `panel.nolagnetwork.net`. La Route del Worker solo intercepta
+HTTP Host Header `panel.ciphermode.net`. La Route del Worker solo intercepta
 las descargas `/servers/13/files/*`, no el panel ni sus APIs.
 
 La variable opcional `NOLAG_HOST_ALIASES` permite filtrar otros hostnames
