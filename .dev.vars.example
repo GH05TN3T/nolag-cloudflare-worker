@@ -1,0 +1,3 @@
+# Optional local reporting secret. Copy to .dev.vars and enter your server API key.
+# The production value belongs in Cloudflare Settings > Variables and Secrets.
+NOLAG_API_KEY=""

@@ -22,6 +22,7 @@ test('edge guard blocks default Requests profiles despite a valid token and norm
     const response = await guard.fetch(request(encoding), env, { waitUntil: task => tasks.push(task) });
     assert.equal(response.status, 403);
     assert.equal(response.headers.get('X-Nolag-Edge-Reason'), 'requests_header_profile');
+    assert.equal(response.headers.get('X-Nolag-Edge-Version'), '1.3.0');
     assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
   }
   await Promise.all(tasks);
@@ -29,6 +30,7 @@ test('edge guard blocks default Requests profiles despite a valid token and norm
   const [url, report] = calls[0];
   assert.equal(url, 'https://panel.example.test/api/report');
   assert.equal(report.headers['X-API-Key'], 'edge-only-secret');
+  assert.equal(report.headers['X-CitizenFX-Token'], 'valid-native-session');
   const body = JSON.parse(report.body);
   assert.equal(body.detection_type, 'http_client_profile_blocked');
   assert.equal(body.enforce_ip_ban, false);
@@ -60,4 +62,18 @@ test('report errors do not serve blocked assets and an unconfigured Worker does 
   assert.equal(response.status, 403);
   await Promise.all(tasks);
   assert.equal((await guard.fetch(request(''), {}, {})).status, 503);
+});
+
+test('domain migration filters the canonical host and explicitly configured aliases', async () => {
+  const calls = [];
+  const guard = createGuard(async req => { calls.push(req); return new Response('origin'); });
+  const migrated = { NOLAG_HOST: 'antidump.nolagnetwork.net', NOLAG_SERVER_ID: '13',
+    NOLAG_HOST_ALIASES: 'antidump.ciphermode.net, SECOND.example.test ' };
+  for (const host of ['antidump.nolagnetwork.net', 'antidump.ciphermode.net', 'second.example.test']) {
+    const req = request('gzip, deflate', { url: `https://${host}/servers/13/files/car/asset.ytd?hash=abc` });
+    assert.equal((await guard.fetch(req, migrated, {})).status, 403);
+  }
+  const other = request('gzip, deflate', { url: 'https://unrelated.example.test/servers/13/files/car/asset.ytd?hash=abc' });
+  assert.equal((await guard.fetch(other, migrated, {})).status, 200);
+  assert.equal(calls.length, 1);
 });

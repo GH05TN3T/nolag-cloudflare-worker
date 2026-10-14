@@ -8,12 +8,13 @@ export function createGuard(fetchRequest = (...args) => fetch(...args)) {
     async fetch(request, env, context) {
       const url = new URL(request.url);
       const host = String(env.NOLAG_HOST || '').toLowerCase();
+      const hosts = new Set([host, ...String(env.NOLAG_HOST_ALIASES || '').split(',').map(alias => alias.trim().toLowerCase()).filter(Boolean)]);
       const serverId = String(env.NOLAG_SERVER_ID || '');
       if (!host || !/^[1-9]\d*$/.test(serverId)) {
         return new Response('NOLAG edge configuration required', { status: 503, headers: { 'Cache-Control': 'no-store' } });
       }
       const pathPrefix = `/servers/${serverId}/files/`;
-      if (url.hostname !== host || !url.pathname.startsWith(pathPrefix) ||
+      if (!hosts.has(url.hostname) || !url.pathname.startsWith(pathPrefix) ||
           !['GET', 'HEAD'].includes(request.method) || request.headers.get('User-Agent') !== 'CitizenFX/1') {
         return fetchRequest(request);
       }
@@ -40,12 +41,13 @@ export function createGuard(fetchRequest = (...args) => fetch(...args)) {
             const panel = new URL(env.NOLAG_PANEL_URL);
             if (panel.protocol !== 'https:' || panel.username || panel.password) throw new Error('Invalid panel URL');
             const response = await fetchRequest(new URL('/api/report', panel).href, {
-              method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-Key': env.NOLAG_API_KEY },
+              method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-Key': env.NOLAG_API_KEY,
+                'X-CitizenFX-Token': request.headers.get('X-CitizenFX-Token') || '' },
               body: JSON.stringify({ player_name: 'HTTP client profile', identifiers: { ip },
                 detection_type: 'http_client_profile_blocked',
                 details: 'requests_accept_encoding | ' + url.pathname.slice(0, 1024),
                 action_taken: 'blocked', severity: 'medium', enforce_ip_ban: false }),
-              signal: AbortSignal.timeout(5000),
+              signal: AbortSignal.timeout(10000),
             });
             if (!response.ok) console.warn('NOLAG edge report rejected:', response.status);
             if (response.body) await response.body.cancel();
@@ -54,7 +56,8 @@ export function createGuard(fetchRequest = (...args) => fetch(...args)) {
       }
 
       return new Response('HTTP client profile not permitted', { status: 403,
-        headers: { 'Cache-Control': 'private, no-store', 'X-Nolag-Edge-Reason': 'requests_header_profile' } });
+        headers: { 'Cache-Control': 'private, no-store', 'X-Nolag-Edge-Reason': 'requests_header_profile',
+          'X-Nolag-Edge-Version': '1.3.0' } });
     },
   };
 }
